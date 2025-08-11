@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cowboys do Deserto - Controle de Presença </title>
+    <title>Cowboys do Deserto - Controle de Presença</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -122,10 +122,9 @@
 
     <div class="max-w-7xl mx-auto">
         <header class="text-center mb-10 flex flex-col items-center justify-center">
-            <img src="https://i.imgur.com/3Yd3s0w.jpeg" 
+            <img src="logo.jpg" 
                  alt="Cowboys do Deserto Logo" 
-                 class="h-24 mb-4"
-                 onerror="this.onerror=null; this.src='https://placehold.co/300x120/E87A24/ffffff?text=Cowboys+do+Deserto';">
+                 class="h-24 mb-4">
             <h1 class="text-4xl font-bold text-white">Cowboys do Deserto</h1>
             <p class="text-gray-400 mt-2">Controle de Presença</p>
         </header>
@@ -188,14 +187,17 @@
         import { getFirestore, doc, collection, onSnapshot, addDoc, deleteDoc, query, where, Timestamp, updateDoc, deleteField, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Configuração do Firebase
-        const firebaseConfig = {
-                    apiKey: "AIzaSyBcotpxccLEKmiUD2DSdoBKBo6pkxf8R4U",
-                    authDomain: "cowboys-do-deserto-volei.firebaseapp.com",
-                    projectId: "cowboys-do-deserto-volei",
-                    storageBucket: "cowboys-do-deserto-volei.firebasestorage.app",
-                    messagingSenderId: "965988450529",
-                    appId: "1:965988450529:web:a0c55317109a93ffd437a0"
-        };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : { 
+                apiKey: "COLE_SUA_API_KEY_AQUI", 
+                authDomain: "COLE_SEU_AUTH_DOMAIN_AQUI", 
+                projectId: "COLE_SEU_PROJECT_ID_AQUI",
+                storageBucket: "COLE_SEU_STORAGE_BUCKET_AQUI",
+                messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID_AQUI",
+                appId: "COLE_SEU_APP_ID_AQUI"
+              };
+        
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'volei-app-default';
 
         // Inicialização do Firebase
@@ -633,4 +635,3 @@
     </script>
 </body>
 </html>
-
