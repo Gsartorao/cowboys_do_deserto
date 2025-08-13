@@ -181,134 +181,132 @@
     </div>
 
     <script type="module">
-        // Importações do Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, onSnapshot, addDoc, deleteDoc, query, where, Timestamp, updateDoc, deleteField, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    // Importações do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, collection, onSnapshot, addDoc, deleteDoc, query, where, Timestamp, updateDoc, deleteField, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuração do Firebase
-        firebaseConfig = {
-            apiKey: "AIzaSyBcotpxccLEKmiUD2DSdoBKBo6pkxf8R4U",
-            authDomain: "cowboys-do-deserto-volei.firebaseapp.com",
-            projectId: "cowboys-do-deserto-volei",
-            storageBucket: "cowboys-do-deserto-volei.firebasestorage.app",
-            messagingSenderId: "965988450529",
-            appId: "1:965988450529:web:a0c55317109a93ffd437a0"
-          };
-        
-        const appId = 'volei-app-default';
+    // ===================================================================================
+    // COLE AS SUAS CHAVES DO FIREBASE DENTRO DAS ASPAS ABAIXO
+    // ===================================================================================
+    const firebaseConfig = { 
+        apiKey: "AIzaSyBcotpxccLEKmiUD2DSdoBKBo6pkxf8R4U",
+        authDomain: "cowboys-do-deserto-volei.firebaseapp.com",
+        projectId: "cowboys-do-deserto-volei",
+        storageBucket: "cowboys-do-deserto-volei.firebasestorage.app",
+        messagingSenderId: "965988450529",
+        appId: "1:965988450529:web:a0c55317109a93ffd437a0"
+    };
+    // ===================================================================================
+    
+    const appId = 'volei-app-default'; // Usando o ID que está no seu Firebase
 
-        // Inicialização do Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Inicialização do Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        let currentUserId = null;
+    let currentUserId = null;
 
-        // --- AUTENTICAÇÃO ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUserId = user.uid;
-                loadInitialData();
-            }
-        });
+    // --- AUTENTICAÇÃO ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUserId = user.uid;
+            loadInitialData();
+        }
+    });
 
-        (async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Erro na autenticação:", error);
-                showStatusMessage(`Erro de Auth: ${error.message}`);
-            }
-        })();
+    (async () => {
+        try {
+            await signInAnonymously(auth);
+        } catch (error) {
+            console.error("Erro na autenticação:", error);
+            showStatusMessage(`Erro de Auth: ${error.message}`);
+        }
+    })();
 
-        // --- REFERÊNCIAS DO FIRESTORE ---
-        const playersCollection = collection(db, `artifacts/${appId}/public/data/players`);
-        const gamesCollection = collection(db, `artifacts/${appId}/public/data/games`);
-        
-        // --- ELEMENTOS DO DOM ---
-        const newPlayerNameInput = document.getElementById('new-player-name');
-        const addPlayerBtn = document.getElementById('add-player-btn');
-        const playersListDiv = document.getElementById('players-list');
-        const nextGameDateInput = document.getElementById('next-game-date');
-        const scheduleGameBtn = document.getElementById('schedule-game-btn');
-        const nextGameInfoDiv = document.getElementById('next-game-info');
-        const gameHistoryDiv = document.getElementById('game-history');
-        const statusMessageDiv = document.getElementById('status-message');
+    // --- REFERÊNCIAS DO FIRESTORE ---
+    const playersCollection = collection(db, `artifacts/${appId}/public/data/players`);
+    const gamesCollection = collection(db, `artifacts/${appId}/public/data/games`);
+    
+    // --- ELEMENTOS DO DOM ---
+    const newPlayerNameInput = document.getElementById('new-player-name');
+    const addPlayerBtn = document.getElementById('add-player-btn');
+    const playersListDiv = document.getElementById('players-list');
+    const nextGameDateInput = document.getElementById('next-game-date');
+    const scheduleGameBtn = document.getElementById('schedule-game-btn');
+    const nextGameInfoDiv = document.getElementById('next-game-info');
+    const gameHistoryDiv = document.getElementById('game-history');
+    const statusMessageDiv = document.getElementById('status-message');
 
-        // --- VARIÁVEIS DE ESTADO ---
-        let allPlayers = [];
-        let currentScheduledGame = null; 
+    // --- VARIÁVEIS DE ESTADO ---
+    let allPlayers = [];
+    let currentScheduledGame = null; 
 
-        // --- FUNÇÕES DE UI ---
-        function showStatusMessage(message, isError = true) {
-            statusMessageDiv.textContent = message;
-            statusMessageDiv.className = `fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white text-center z-50 transform transition-transform duration-300 ease-out ${isError ? 'bg-red-600' : 'bg-green-600'}`;
-            setTimeout(() => statusMessageDiv.classList.remove('translate-x-[200%]'), 10);
-            setTimeout(() => statusMessageDiv.classList.add('translate-x-[200%]'), 4000);
+    // --- FUNÇÕES DE UI ---
+    function showStatusMessage(message, isError = true) {
+        statusMessageDiv.textContent = message;
+        statusMessageDiv.className = `fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white text-center z-50 transform transition-transform duration-300 ease-out ${isError ? 'bg-red-600' : 'bg-green-600'}`;
+        setTimeout(() => statusMessageDiv.classList.remove('translate-x-[200%]'), 10);
+        setTimeout(() => statusMessageDiv.classList.add('translate-x-[200%]'), 4000);
+    }
+
+    // --- FUNÇÕES DE RENDERIZAÇÃO ---
+    function renderAll() {
+        renderPlayers();
+        renderNextGame();
+    }
+
+    function renderPlayers() {
+        playersListDiv.innerHTML = '';
+        if (allPlayers.length === 0) {
+            playersListDiv.innerHTML = '<p class="text-gray-400 col-span-full">Nenhum jogador cadastrado.</p>';
+            return;
         }
 
-        // --- FUNÇÕES DE RENDERIZAÇÃO ---
-        function renderAll() {
-            renderPlayers();
-            renderNextGame();
-        }
+        const attendees = currentScheduledGame?.attendees || {};
 
-        function renderPlayers() {
-            playersListDiv.innerHTML = '';
-            if (allPlayers.length === 0) {
-                playersListDiv.innerHTML = '<p class="text-gray-400 col-span-full">Nenhum jogador cadastrado.</p>';
-                return;
-            }
-
-            const attendees = currentScheduledGame?.attendees || {};
-
-            allPlayers.forEach(player => {
-                const confirmation = attendees[player.id];
-                const isConfirmed = !!confirmation;
-                const playerEl = document.createElement('div');
-                playerEl.id = `player-item-${player.id}`;
-                playerEl.className = `player-item ${isConfirmed ? 'confirmed' : ''}`;
-                
-                let confirmationHtml = '';
-                if (isConfirmed) {
-                    const otherTime = confirmation.playingTime === '1 hora' ? '2 horas' : '1 hora';
-                    confirmationHtml = `
-                        <button class="confirm-btn" data-player-id="${player.id}" data-player-name="${player.name}" data-time="${otherTime}">Mudar p/ ${otherTime.split(' ')[0]}</button>
-                        <button class="unconfirm-btn" data-player-id="${player.id}">Remover</button>
-                    `;
-                } else {
-                    confirmationHtml = `
-                        <button class="confirm-btn" data-player-id="${player.id}" data-player-name="${player.name}" data-time="1 hora">1h</button>
-                        <button class="confirm-btn" data-player-id="${player.id}" data-player-name="${player.name}" data-time="2 horas">2h</button>
-                    `;
-                }
-
-                playerEl.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <span class="player-name font-medium">${player.name} ${isConfirmed ? `(${confirmation.playingTime})` : ''}</span>
-                        <div class="player-edit-form hidden">
-                            <input type="text" value="${player.name}" class="input-field input-field-sm !p-1 !text-sm !w-full">
-                        </div>
-                        <div class="player-actions flex items-center gap-1">
-                            <button class="action-icon edit-player-btn" data-player-id="${player.id}" title="Editar nome">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V12h2.293z"/></svg>
-                            </button>
-                            <button class="action-icon remove-player-btn" data-player-id="${player.id}" title="Remover jogador">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="confirmation-actions mt-2 flex items-center gap-2 text-xs">
-                        ${confirmationHtml}
-                    </div>
+        allPlayers.forEach(player => {
+            const confirmation = attendees[player.id];
+            const isConfirmed = !!confirmation;
+            const playerEl = document.createElement('div');
+            playerEl.id = `player-item-${player.id}`;
+            playerEl.className = `player-item ${isConfirmed ? 'confirmed' : ''}`;
+            
+            let confirmationHtml = '';
+            if (isConfirmed) {
+                const otherTime = confirmation.playingTime === '1 hora' ? '2 horas' : '1 hora';
+                confirmationHtml = `
+                    <button class="confirm-btn" data-player-id="${player.id}" data-player-name="${player.name}" data-time="${otherTime}">Mudar p/ ${otherTime.split(' ')[0]}</button>
+                    <button class="unconfirm-btn" data-player-id="${player.id}">Remover</button>
                 `;
-                playersListDiv.appendChild(playerEl);
-            });
+            } else {
+                confirmationHtml = `
+                    <button class="confirm-btn" data-player-id="${player.id}" data-player-name="${player.name}" data-time="1 hora">1h</button>
+                    <button class="confirm-btn" data-player-id="${player.id}" data-player-name="${player.name}" data-time="2 horas">2h</button>
+                `;
+            }
+
+            playerEl.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <span class="player-name font-medium">${player.name} ${isConfirmed ? `(${confirmation.playingTime})` : ''}</span>
+                    <div class="player-edit-form hidden">
+                        <input type="text" value="${player.name}" class="input-field input-field-sm !p-1 !text-sm !w-full">
+                    </div>
+                    <div class="player-actions flex items-center gap-1">
+                        <button class="action-icon edit-player-btn" data-player-id="${player.id}" title="Editar nome">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V12h2.293z"/></svg>
+                        </button>
+                        <button class="action-icon remove-player-btn" data-player-id="${player.id}" title="Remover jogador">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="confirmation-actions mt-2 flex items-center gap-2 text-xs">
+                    ${confirmationHtml}
+                </div>
+            `;
+            playersListDiv.appendChild(playerEl);
         }
 
         function renderNextGame() {
