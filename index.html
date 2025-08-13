@@ -403,20 +403,29 @@
         
         // --- MANIPULADORES DE EVENTOS ---
         async function handleAddPlayer() {
-            const name = newPlayerNameInput.value.trim();
-            if (name) {
-                try {
-                    await addDoc(playersCollection, { name });
-                    newPlayerNameInput.value = '';
-                    showStatusMessage('Jogador adicionado!', false);
-                } catch (error) {
-                    console.error("Erro ao adicionar jogador:", error);
-                    showStatusMessage(`Falha ao adicionar: ${error.message}`);
-                }
-            } else {
-                showStatusMessage("O nome do jogador não pode estar vazio.");
-            }
-        }
+    const name = newPlayerNameInput.value.trim();
+    if (!name) {
+        showStatusMessage("O nome do jogador não pode estar vazio.");
+        return;
+    }
+
+    // Verifica se o jogador já existe (ignorando maiúsculas/minúsculas)
+    const existingPlayer = allPlayers.find(player => player.name.toLowerCase() === name.toLowerCase());
+
+    if (existingPlayer) {
+        showStatusMessage(`O jogador "${name}" já está na lista.`);
+        return;
+    }
+
+    try {
+        await addDoc(playersCollection, { name });
+        newPlayerNameInput.value = '';
+        showStatusMessage('Jogador adicionado!', false);
+    } catch (error) {
+        console.error("Erro ao adicionar jogador:", error);
+        showStatusMessage(`Falha ao adicionar: ${error.message}`);
+    }
+}
 
         addPlayerBtn.addEventListener('click', handleAddPlayer);
         newPlayerNameInput.addEventListener('keydown', (e) => {
